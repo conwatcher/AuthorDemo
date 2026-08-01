@@ -1,0 +1,7 @@
+# T.R. Dailey — demonstration site
+# Crawling is allowed. Update the Sitemap line if the site moves.
+
+User-agent: *
+Allow: /
+
+Sitemap: https://conwatcher.github.io/AuthorDemo/sitemap.xml

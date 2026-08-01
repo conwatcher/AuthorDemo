@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="T.R. Dailey">
+  <!-- Site mark: the gold diamond ornament used throughout the site,
+       on the same deep ink used by the hero and footer.
+       To re-brand, change the two fill values below to your own tokens. -->
+  <rect width="32" height="32" rx="5" fill="#10151f"/>
+  <rect x="5" y="15.4" width="22" height="1.2" fill="#c9a227" opacity=".45"/>
+  <path d="M16 7.5 L21.5 16 L16 24.5 L10.5 16 Z" fill="#10151f"/>
+  <path d="M16 9.5 L19.8 16 L16 22.5 L12.2 16 Z" fill="#c9a227"/>
+</svg>
