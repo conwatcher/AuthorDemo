@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Working together — how a build works</title>
+<style>
+  :root{
+    --paper:#f6f8f7;
+    --paper-raised:#ffffff;
+    --ink:#20302d;
+    --body:#333f3c;
+    --muted:#67726d;
+    --accent:#2f6f62;
+    --accent-deep:#245449;
+    --accent-wash:#e6efec;
+    --line:#dbe3df;
+    --tbc-bg:#fbf1dd;
+    --tbc-line:#e4c684;
+    --tbc-ink:#7a5a17;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto;}}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--body);
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:18px;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:720px;margin:0 auto;padding:0 22px;}
+
+  /* header */
+  header.masthead{
+    background:var(--ink);
+    color:var(--paper);
+    padding:44px 0 40px;
+    border-bottom:3px solid var(--accent);
+  }
+  header.masthead .wrap{padding-top:0;}
+  .eyebrow{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-size:12px;letter-spacing:.18em;text-transform:uppercase;
+    color:#9fc4ba;margin:0 0 14px;
+  }
+  h1{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-weight:600;font-size:32px;line-height:1.2;margin:0 0 14px;color:#fff;
+  }
+  header.masthead p{margin:0;color:#c8d6d1;font-size:17px;max-width:52ch;}
+
+  /* contents */
+  nav.toc{
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:20px 22px 22px;
+    margin:34px 0 8px;
+  }
+  nav.toc h2{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);
+    font-weight:700;margin:0 0 14px;
+  }
+  nav.toc ol{margin:0;padding:0;list-style:none;counter-reset:toc;}
+  nav.toc li{counter-increment:toc;margin:0;}
+  nav.toc a{
+    display:flex;gap:12px;align-items:baseline;
+    padding:7px 0;color:var(--body);text-decoration:none;
+    border-bottom:1px solid var(--line);
+    font-size:16.5px;
+  }
+  nav.toc li:last-child a{border-bottom:none;}
+  nav.toc a::before{
+    content:counter(toc,decimal-leading-zero);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-size:12px;color:var(--accent);font-weight:700;min-width:22px;
+    letter-spacing:.04em;
+  }
+  nav.toc a:hover,nav.toc a:focus-visible{color:var(--accent-deep);}
+
+  /* sections */
+  section{padding:34px 0 6px;border-top:1px solid var(--line);margin-top:22px;}
+  section:first-of-type{border-top:none;margin-top:8px;}
+  .sec-num{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);
+    font-weight:700;display:block;margin-bottom:8px;
+  }
+  h2.sec{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-weight:600;font-size:24px;line-height:1.25;color:var(--ink);margin:0 0 16px;
+  }
+  h3{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-weight:600;font-size:17px;color:var(--ink);margin:26px 0 8px;
+  }
+  p{margin:0 0 16px;}
+  em{color:var(--ink);}
+  a{color:var(--accent-deep);}
+  ul{margin:0 0 16px;padding-left:0;list-style:none;}
+  ul li{position:relative;padding-left:24px;margin-bottom:10px;}
+  ul li::before{
+    content:"";position:absolute;left:2px;top:11px;
+    width:7px;height:7px;border-radius:50%;background:var(--accent);
+  }
+
+  /* callout — the differentiator */
+  .callout{
+    background:var(--accent-wash);
+    border-left:3px solid var(--accent);
+    border-radius:0 8px 8px 0;
+    padding:18px 20px;margin:4px 0 20px;
+  }
+  .callout p{margin:0;color:var(--accent-deep);font-size:17px;}
+  .callout strong{color:var(--accent-deep);}
+
+  /* to-confirm marker */
+  .tbc{
+    background:var(--tbc-bg);
+    border:1px solid var(--tbc-line);
+    border-radius:4px;
+    padding:1px 7px;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-size:14px;color:var(--tbc-ink);white-space:normal;
+  }
+
+  .note{color:var(--muted);font-size:16px;}
+
+  footer{
+    border-top:1px solid var(--line);
+    margin-top:40px;padding:30px 0 60px;
+    color:var(--muted);font-size:16px;
+  }
+  footer .wrap{padding-top:0;}
+
+  a:focus-visible,nav.toc a:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px;}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap">
+    <p class="eyebrow">Author websites</p>
+    <h1>How a build works, start to finish</h1>
+    <p>This page lays out exactly what you're getting, what you own, and how everything runs going forward. Keep it open while we work — anything you're unsure about is a question worth asking as we go, not after.</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <nav class="toc" aria-label="Contents">
+    <h2>What's on this page</h2>
+    <ol>
+      <li><a href="#pilot">Your build, and what I'm asking in return</a></li>
+      <li><a href="#included">What's included</a></li>
+      <li><a href="#excluded">What's not included</a></li>
+      <li><a href="#own">What you own — from day one</a></li>
+      <li><a href="#keep">What I keep</a></li>
+      <li><a href="#yours">Your part in it</a></li>
+      <li><a href="#changes">Changes and the Care Year</a></li>
+      <li><a href="#tails">Anything with an ongoing bill</a></li>
+      <li><a href="#later">What comes later</a></li>
+      <li><a href="#limits">A few honest limits</a></li>
+    </ol>
+  </nav>
+
+  <section id="pilot">
+    <span class="sec-num">Section 01</span>
+    <h2 class="sec">Your build, and what I'm asking in return</h2>
+    <p>Yours is one of the first sites I'm building, so it's free. In place of payment, I'm asking two things: a short, honest testimonial once it's live, and your permission to show the finished site as an example of my work. That's the whole trade — nothing hidden behind it.</p>
+    <p>A build like this is normally a paid piece of work. I'm telling you that so you know the site has real value behind it, not to imply a bill is coming. There isn't one.</p>
+    <p>Your first twelve months of changes come with the build, the same as any client's. If you choose to renew a Care Year after that, it runs on the normal terms — but that's a later choice, and entirely yours.</p>
+    <p>One small thing isn't free, because it can't be. If you want your own web address — <em>yourname.com</em> rather than a longer shared one — you buy that yourself. It's a domain registration, usually around fifteen to twenty dollars a year, paid straight to the registrar in your name. I walk you through buying it during setup and connect it to your site at no charge; the only cost is that yearly registrar fee, and it's yours to pay because the address is yours to own.</p>
+  </section>
+
+  <section id="included">
+    <span class="sec-num">Section 02</span>
+    <h2 class="sec">What's included</h2>
+    <p>A complete, working website built for you and handed over in your name. That covers:</p>
+    <ul>
+      <li>Your core pages — a home page, a page that gathers your books, an about page, and a contact page</li>
+      <li>An individual book page for your work, built from a reusable layout so every title looks consistent <span class="tbc">[ to confirm: how many individual book pages the standard package includes before additional ones become a paid add-on — the full package still needs outlining ]</span></li>
+      <li>A design that reads properly on phones, tablets and desktops</li>
+      <li>Basic search and social metadata, so the site shows up sensibly when shared or searched</li>
+      <li>Your own domain connected and secured with HTTPS — connecting it is part of the build (buying it is the one small cost noted above)</li>
+    </ul>
+    <p class="note">The site is fast and self-contained — no page builders, no plugins, nothing loading from somewhere else that can slow it down or break it.</p>
+  </section>
+
+  <section id="excluded">
+    <span class="sec-num">Section 03</span>
+    <h2 class="sec">What's not included</h2>
+    <p>So there's no confusion later, these sit outside the build:</p>
+    <ul>
+      <li>Writing the words on your site — the copy is yours</li>
+      <li>Photos, cover images or other artwork — you supply those</li>
+      <li>Order fulfilment or shipping of anything you sell</li>
+      <li>Print design or cover design</li>
+      <li>Any guarantee of search ranking or traffic</li>
+    </ul>
+    <p>If you want help with something on this list, we can talk about it — but it's separate from the build, not assumed inside it.</p>
+  </section>
+
+  <section id="own">
+    <span class="sec-num">Section 04</span>
+    <h2 class="sec">What you own — from day one</h2>
+    <p>This is the part that makes this different from a website platform, so it's worth reading closely.</p>
+    <p>From our first setup session, everything the site runs on is <em>in your name</em>: the domain, the code repository, the hosting account, and all the content. You don't rent your site from me. You own it outright, from the beginning.</p>
+    <div class="callout">
+      <p><strong>Your site stays live whether or not you ever renew anything with me.</strong> There's no switch I can flip that takes it down. It's yours to keep, move, or hand to someone else — always.</p>
+    </div>
+    <h3>How the handoff works</h3>
+    <p>When the build is done, I transfer the repository to your account, and you add me back as a collaborator so I can make changes when you ask. You'll also get a short ownership document — plain language, listing every account, where it lives, and how to reach it — so nothing about your own site is a mystery to you.</p>
+  </section>
+
+  <section id="keep">
+    <span class="sec-num">Section 05</span>
+    <h2 class="sec">What I keep</h2>
+    <p>You own your finished site completely — every word, image, and page, and the code that runs it. What stays mine is the underlying base template I build from and reuse across projects: the framework and system architecture underneath, not your site itself.</p>
+    <p>In plain terms — you own the house; I keep the blueprint I build houses from. Owning your house fully doesn't give either of us a claim on the other's, and nothing about my keeping the blueprint touches your ownership of what you've got.</p>
+  </section>
+
+  <section id="yours">
+    <span class="sec-num">Section 06</span>
+    <h2 class="sec">Your part in it</h2>
+    <p>The build moves at the speed of your content. Here's what I need from you:</p>
+    <ul>
+      <li>The words and images for the site — and your confirmation that you have the right to use them. Anything you hand me, you're telling me is yours to use.</li>
+      <li>Your content in whatever order it's ready — the sooner it's in, the sooner your site is live.</li>
+    </ul>
+    <p>There's no hard deadline on your build and no restart fee — you're one of the first, so we work at a pace that suits you. All I ask is that we keep the momentum going once we start, so it doesn't stall half-built.</p>
+    <p class="note">Because the words and images are yours, you're also the one standing behind them — if anything on your site ever draws a copyright or legal complaint about content you supplied, that sits with you, not with me.</p>
+  </section>
+
+  <section id="changes">
+    <span class="sec-num">Section 07</span>
+    <h2 class="sec">Changes and the Care Year</h2>
+    <p>Once your site is live, keeping it current is simple, because there's a clear line between the two kinds of work.</p>
+    <h3>What counts as a change</h3>
+    <p>A change is one request I handle in a single pass — roughly up to thirty minutes of work. Swapping a cover, updating your bio, adding a buy link, changing an event date: that's a change. If you send several small tweaks at once, they're handled together as one.</p>
+    <h3>Change versus new work</h3>
+    <p>Editing something that already exists on your site is a change. Adding something that wasn't there — a whole new page, a new feature, a new integration — is new work, and that's billed separately. The difference is always <em>editing what exists</em> versus <em>building something new</em>.</p>
+    <h3>The Care Year</h3>
+    <p>Your build comes with twelve months of changes included — up to twelve of them across that first year. After that, a Care Year renews the allowance for another twelve. It's a <em>change allowance</em>, not a maintenance contract: a static site like yours has nothing to patch and no plugins to update, so you're never paying me to keep the lights on. You're paying only for the times you want something edited — and renewal runs the same for you as for anyone else.</p>
+    <div class="callout">
+      <p><strong>Anything I built that breaks gets fixed free, indefinitely.</strong> A defect is my problem to fix, not a change you spend an allowance on. Requests and new designs are billable; things that break are not.</p>
+    </div>
+  </section>
+
+  <section id="tails">
+    <span class="sec-num">Section 08</span>
+    <h2 class="sec">Anything with an ongoing bill</h2>
+    <p>Some things a site can do come with a recurring cost or an outside account behind them — a payment button, a mailing-list signup, anything driven by a paid service. There's a firm rule for all of them: the account, the keys, and the bill are set up <em>in your name</em>, on your card, from the start.</p>
+    <p>Nothing that charges money on an ongoing basis ever runs through me. This keeps it clean the same way the rest of your site does — if we add a buy button down the road, it's your payment account, your money, your control. I set it up; I don't sit in the middle of it.</p>
+  </section>
+
+  <section id="later">
+    <span class="sec-num">Section 09</span>
+    <h2 class="sec">What comes later</h2>
+    <p>These are <em>planned paid features</em> I'm hoping to offer down the road — not part of your build, and not a promise, but a sense of where this is headed. Extra pages, contact forms, mailing-list signups, a place to blog: things authors may want to add on as the service grows.</p>
+    <p>What you're getting now is a complete site, not a stripped-down version of one. I'm sharing the plan so you can see your site as a foundation that can grow, not a fixed box — if one of these lands and you want it later, the door's open. If there's something you're already picturing, tell me; it helps me know what to build next.</p>
+  </section>
+
+  <section id="limits">
+    <span class="sec-num">Section 10</span>
+    <h2 class="sec">A few honest limits</h2>
+    <p>Nothing here changes what you're getting. It's just what I can and can't stand behind, said plainly.</p>
+    <ul>
+      <li>Your site sits on services I don't run — the place your domain is registered, the host, and so on. If one of them has an outage or changes its own rules, I'll help you deal with it, but I can't be responsible for their decisions.</li>
+      <li>I don't guarantee search rankings or sales. I build the site well; what the market does with it isn't something anyone can promise.</li>
+      <li>During the build, we work through up to three rounds of revisions, so we land the design without it drifting forever. If a round is needed because I misread what you wanted or didn't have enough to go on, that one's on me — it doesn't count against your three.</li>
+      <li>Expect the build to take three to four weeks once I have your content, and later changes to be turned around within five business days.</li>
+    </ul>
+  </section>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <p>This page is here to be read more than once. If a section raises a question while we're working, that's exactly what it's for — ask, and I'll walk you through it.</p>
+    <p class="note">Last updated <span class="tbc">[ date ]</span> · <span class="tbc">[ your name / contact email ]</span></p>
+  </div>
+</footer>
+
+</body>
+</html>
